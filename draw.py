@@ -1,6 +1,98 @@
 import gmsh
 import json
 import os
+import tkinter as tk
+from tkinter import messagebox
+
+def get_house_parameters():
+    # Словарь для хранения введенных значений
+    parameters = {}
+
+    def submit_action():
+        nonlocal parameters
+        # Сбор данных из всех полей ввода
+        parameters["width"] = width_entry.get()
+        parameters["height"] = height_entry.get()
+        parameters["roof_height"] = roof_height_entry.get()
+        parameters["wall_thickness"] = wall_thickness_entry.get()
+        parameters["stove_height"] = stove_height_entry.get()
+        parameters["stove_width"] = stove_width_entry.get()
+        parameters["roof_thickness"] = roof_thickness_entry.get()
+        
+        # Закрытие окна после сбора данных
+        root.destroy()
+    
+    def cancel_action():
+        # Очистка всех полей ввода
+        entries = [width_entry, height_entry, roof_height_entry, wall_thickness_entry, 
+                   stove_height_entry, stove_width_entry, roof_thickness_entry]
+        for entry in entries:
+            entry.delete(0, tk.END)
+    
+    # Создание главного окна
+    root = tk.Tk()
+    root.title("Параметры дома")
+    
+    # Заголовок
+    title_label = tk.Label(root, text="Введите параметры дома", font=("Arial", 14))
+    title_label.grid(row=0, column=0, columnspan=2, pady=10)
+    
+    # Поля для ввода ширины
+    width_label = tk.Label(root, text="Ширина:")
+    width_label.grid(row=1, column=0, sticky='e', padx=10, pady=5)
+    width_entry = tk.Entry(root)
+    width_entry.grid(row=1, column=1, padx=10, pady=5)
+    
+    # Поля для ввода высоты
+    height_label = tk.Label(root, text="Высота:")
+    height_label.grid(row=2, column=0, sticky='e', padx=10, pady=5)
+    height_entry = tk.Entry(root)
+    height_entry.grid(row=2, column=1, padx=10, pady=5)
+    
+    # Поля для ввода высоты крыши
+    roof_height_label = tk.Label(root, text="Высота крыши:")
+    roof_height_label.grid(row=3, column=0, sticky='e', padx=10, pady=5)
+    roof_height_entry = tk.Entry(root)
+    roof_height_entry.grid(row=3, column=1, padx=10, pady=5)
+    
+    # Поля для ввода толщины стены
+    wall_thickness_label = tk.Label(root, text="Толщина стены:")
+    wall_thickness_label.grid(row=4, column=0, sticky='e', padx=10, pady=5)
+    wall_thickness_entry = tk.Entry(root)
+    wall_thickness_entry.grid(row=4, column=1, padx=10, pady=5)
+    
+    # Поля для ввода высоты печки
+    stove_height_label = tk.Label(root, text="Высота печки:")
+    stove_height_label.grid(row=5, column=0, sticky='e', padx=10, pady=5)
+    stove_height_entry = tk.Entry(root)
+    stove_height_entry.grid(row=5, column=1, padx=10, pady=5)
+    
+    # Поля для ввода ширины печки
+    stove_width_label = tk.Label(root, text="Ширина печки:")
+    stove_width_label.grid(row=6, column=0, sticky='e', padx=10, pady=5)
+    stove_width_entry = tk.Entry(root)
+    stove_width_entry.grid(row=6, column=1, padx=10, pady=5)
+    
+    # Поля для ввода толщины крыши
+    roof_thickness_label = tk.Label(root, text="Толщина крыши:")
+    roof_thickness_label.grid(row=7, column=0, sticky='e', padx=10, pady=5)
+    roof_thickness_entry = tk.Entry(root)
+    roof_thickness_entry.grid(row=7, column=1, padx=10, pady=5)
+    
+    # Кнопка "Подтвердить"
+    submit_button = tk.Button(root, text="Подтвердить", command=submit_action)
+    submit_button.grid(row=8, column=0, pady=10)
+    
+    # Кнопка "Отмена"
+    cancel_button = tk.Button(root, text="Отмена", command=cancel_action)
+    cancel_button.grid(row=8, column=1, pady=10)
+    
+    # Запуск основного цикла событий
+    root.mainloop()
+    
+    # Возврат параметров (сохраненных в переменной `parameters` до уничтожения окна)
+    return parameters
+
 
 def coord_to_json(name, zero_point, width, height):
     current_dir = os.getcwd()
@@ -46,19 +138,28 @@ def json_to_points():
         pass
 
 def house_drawing():
-    gmsh.initialize()
-    gmsh.model.add("house")
-    # Размеры дома
+    # Стандартные значения
     width = 5.0
     height = 2.0
     wall_thickness = 0.2
-    # Размеры печки
-    furn_width = 0.8
-    furn_height = 1
-    # Толщина потолка в комнате
-    ceeling_thikness = 0.5
+    stove_width = 0.8
+    stove_height = 1
     roof_height = 2.4
     roof_thikness = 0.2
+    params = get_house_parameters()
+    gmsh.initialize()
+    gmsh.model.add("house")
+    # Размеры дома
+    width = params[width]
+    height = params[height]
+    wall_thickness = params[wall_thickness]
+    # Размеры печки
+    furn_width = params[stove_width]
+    furn_height = params[stove_height]
+    # Толщина потолка в комнате
+    ceeling_thikness = 0.5
+    roof_height = params[roof_height]
+    roof_thikness = params[roof_thickness]
     snow_thikness = 0.2
 
     coord_to_json('l_wall', [0, 0], wall_thickness, height)
