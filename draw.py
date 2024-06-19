@@ -142,24 +142,41 @@ def house_drawing():
     width = 5.0
     height = 2.0
     wall_thickness = 0.2
-    stove_width = 0.8
-    stove_height = 1
+    furn_width = 0.8
+    furn_height = 1
     roof_height = 2.4
     roof_thikness = 0.2
     params = get_house_parameters()
     gmsh.initialize()
     gmsh.model.add("house")
     # Размеры дома
-    width = params[width]
-    height = params[height]
-    wall_thickness = params[wall_thickness]
+    # params = {k: v for k, v in params.items() if v}
+    clean_dict = {}
+    for k, v in params.items():
+        if v:
+            try:
+                clean_dict[k] = float(v)
+            except(ValueError, TypeError):
+                pass
+    params = clean_dict
+    print(params)
+    if "width" in params:
+        width = params['width']
+    if "height" in params:
+        height = params['height']
+    if "wall_thickness" in params:
+        wall_thickness = params['wall_thickness']
     # Размеры печки
-    furn_width = params[stove_width]
-    furn_height = params[stove_height]
+    if "stove_width" in params:
+        furn_width = params['stove_width']
+    if "stove_height" in params:
+        furn_height = params['stove_height']
     # Толщина потолка в комнате
     ceeling_thikness = 0.5
-    roof_height = params[roof_height]
-    roof_thikness = params[roof_thickness]
+    if "roof_height" in params:
+        roof_height = params['roof_height']
+    if "roof_thickness" in params:
+        roof_thikness = params['roof_thickness']
     snow_thikness = 0.2
 
     coord_to_json('l_wall', [0, 0], wall_thickness, height)
@@ -336,7 +353,7 @@ def house_drawing():
     gmsh.model.mesh.generate(2)
 
     # Визуализация геометрии и сетки
-    # gmsh.fltk.run()
+    gmsh.fltk.run()
 
     # Сохранение геометрии в файл .msh
     gmsh.write("house.msh")
